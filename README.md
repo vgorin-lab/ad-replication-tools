@@ -5,13 +5,13 @@
 
 PowerShell script for diagnosing, auditing, and monitoring Active Directory replication health across domain controllers.
 
-It helps quickly detect replication failures, latency issues, DNS misconfiguration, and time synchronization problems in AD environments.
+The tool performs a multi-layer health check including replication status, DNS resolution, and time synchronization — essential for troubleshooting Active Directory issues and validating domain health.
 
 ---
 
 ## 🏷️ Keywords
 
-Active Directory Replication, AD Replication Monitoring, PowerShell AD Replication, Repadmin alternative, DCDiag replication check, Domain Controller replication status, Get-ADReplicationPartnerMetadata, AD health check, replication failure detection, SYSVOL replication, DFSR status, Kerberos time sync, AD troubleshooting, Windows Server AD tools
+Active Directory Replication, AD Replication Monitoring, PowerShell AD Replication, Repadmin alternative, DCDiag replacement, Domain Controller replication status, Get-ADReplicationPartnerMetadata, AD health check script, replication failure detection, SYSVOL replication, DFSR, Kerberos time sync, DNS resolution AD, Windows Server AD diagnostics
 
 ---
 
@@ -23,6 +23,8 @@ Active Directory Replication, AD Replication Monitoring, PowerShell AD Replicati
 * [Quick Start](#quick-start)
 * [Examples](#examples)
 * [Output](#output)
+* [Object Model](#object-model)
+* [Use Cases](#use-cases)
 * [Documentation](#documentation)
 * [License](#license)
 * [Author](#author)
@@ -32,19 +34,22 @@ Active Directory Replication, AD Replication Monitoring, PowerShell AD Replicati
 ## ✨ Features
 
 * Lists all domain controllers in the domain
-* Checks replication partners and their status
-* Detects replication failures from directory metadata
-* Validates DNS resolution for all domain controllers
-* Checks time synchronization (Kerberos consistency)
-* Returns structured PowerShell objects for automation
+* Checks replication partner health and status
+* Detects replication delays and failures
+* Validates DNS resolution for all DCs
+* Checks time synchronization (Kerberos critical dependency)
+* Provides structured PowerShell object output for automation
+* Supports verbose troubleshooting mode
 
 ---
 
 ## ⚙️ Prerequisites
 
 * Windows PowerShell 5.1 or PowerShell 7+
-* Active Directory PowerShell module (RSAT-AD-Tools)
+* Active Directory PowerShell module (RSAT-AD-PowerShell)
 * Domain user account with read permissions
+* Network connectivity to domain controllers
+* (Optional) WinRM enabled for time synchronization checks
 
 ---
 
@@ -67,7 +72,7 @@ Invoke-WebRequest -Uri "https://raw.githubusercontent.com/vgorin-lab/ad-replicat
 
 ## ⚡ Quick Start
 
-Run replication health check for current domain:
+Run a basic Active Directory replication health check:
 
 ```powershell
 .\Test-ADReplication.ps1
@@ -83,47 +88,137 @@ Run replication health check for current domain:
 .\Test-ADReplication.ps1 -Domain corp.contoso.com
 ```
 
-### Verbose troubleshooting mode
+### Run with verbose output
 
 ```powershell
 .\Test-ADReplication.ps1 -Verbose
 ```
 
-### Save output for automation
+### Save results for automation
 
 ```powershell
 $health = .\Test-ADReplication.ps1
 $health.OverallHealth
 $health.ReplicationErrors
+$health.DnsErrors
+$health.TimeErrors
 ```
 
 ---
 
 ## 📊 Output
 
-Example output:
+The script provides structured console output and machine-readable results.
+
+### Example console output
 
 ```text
-=== AD Replication Health Check ===
-
-Domain              : contoso.com
-DC Count            : 4
-Healthy Replication : True
-Failed Partners     : 0
-Latency Issues      : None
-DNS Status          : OK
-Time Sync Status    : OK
+========================================
+ Active Directory Replication Health Check
+========================================
+Domain: corp.contoso.com
+Timestamp: 2026-06-11 17:40:00
+Domain Controllers: 4
 ```
+
+### Replication status
+
+```text
+✓ DC01 → DC02 : Replication healthy
+⚠ DC02 → DC03 : Last success 2026-06-11 15:20
+✗ DC03: Unable to query replication status
+```
+
+### DNS check
+
+```text
+✓ dc01.corp.contoso.com resolves to 10.0.0.1
+✗ dc03.corp.contoso.com DNS resolution failed
+```
+
+### Time synchronization
+
+```text
+✓ DC01: Time sync OK (0.42s)
+⚠ DC02: Time drift detected (6.31s)
+```
+
+---
+
+## 🧩 Object Model
+
+The script returns a PowerShell object for automation:
+
+```powershell
+$report = .\Test-ADReplication.ps1
+$report | Format-List
+```
+
+### Core properties
+
+```text
+Domain
+DomainControllers
+ReplicationErrors
+DnsErrors
+TimeErrors
+OverallHealth
+Timestamp
+```
+
+---
+
+### ReplicationErrors object
+
+```text
+SourceDC
+PartnerDC
+LastSuccess
+Status
+```
+
+Example:
+
+```text
+SourceDC    : DC02
+PartnerDC   : DC03
+LastSuccess : 2026-06-11 15:20
+Status      : Delayed
+```
+
+---
+
+### OverallHealth states
+
+```text
+Healthy
+IssuesFound
+Error
+```
+
+---
+
+## 🧠 Use Cases
+
+* Active Directory replication troubleshooting
+* Post-DC deployment validation
+* Pre-migration health checks
+* Monitoring AD infrastructure health
+* Replacement for basic repadmin /replsummary workflows
+* DNS and Kerberos validation in domain environments
 
 ---
 
 ## 🔗 Documentation
 
-* AD replication troubleshooting concepts (Microsoft AD DS replication model)
-* Uses native AD PowerShell cmdlets like `Get-ADReplicationPartnerMetadata`
-* Inspired by traditional `repadmin` and `dcdiag` diagnostics
+Built using native Microsoft Active Directory PowerShell cmdlets:
 
-More sysadmin tips and tools:
+* Get-ADDomainController
+* Get-ADReplicationPartnerMetadata
+* Resolve-DnsName
+* Invoke-Command (WinRM time validation)
+
+More guides and sysadmin tools:
 https://sysadmintips.ru
 
 ---
