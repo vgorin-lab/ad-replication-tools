@@ -1,26 +1,73 @@
-# Active Directory Replication Tools
+# AD Replication Tools
 
-PowerShell scripts for diagnosing and monitoring Active Directory replication health between domain controllers.
+[![License: MIT](https://img.shields.io/badge/License-MIT-yellow.svg)](https://opensource.org/licenses/MIT)
+[![PowerShell Version](https://img.shields.io/badge/PowerShell-5.1+-blue.svg)](https://github.com/PowerShell/PowerShell)
 
-## 📋 Overview
+PowerShell script for diagnosing and monitoring Active Directory replication health between domain controllers.
 
-Active Directory replication issues can cause authentication failures, Group Policy application delays, and inconsistent directory data across domain controllers. These tools provide comprehensive replication health checks to identify and troubleshoot replication problems.
+## 🏷️ Keywords
+AD Replication, Active Directory Health, Repadmin, PowerShell AD, DCDiag, Replication Status, Domain Controller Health, AD Topology, Get-ADReplicationPartnerMetadata
 
-## 📜 Scripts
+## ✨ Features
+- Lists all domain controllers in the domain
+- Checks replication partners and their status
+- Identifies replication failures from Event Log
+- Verifies DNS resolution for all DCs
+- Checks time synchronization (critical for Kerberos)
+- Returns a PowerShell object for automation
 
-### `Test-ADReplication.ps1`
+## ⚙️ Prerequisites
+- Windows PowerShell 5.1 or PowerShell 7+
+- Active Directory PowerShell module (RSAT-AD-PowerShell)
+- Domain user account (authenticated)
 
-Comprehensive AD replication health check that performs:
+## 🚀 Installation
 
-✅ Lists all domain controllers in the domain  
-✅ Checks replication partners and their status  
-✅ Identifies replication failures from Event Log  
-✅ Verifies DNS resolution for all DCs  
-✅ Checks time synchronization (critical for Kerberos)  
-✅ Provides detailed analysis and recommendations  
+### Option 1: Clone the repository
+```powershell
+git clone https://github.com/vgorin-lab/ad-replication-tools.git
+cd ad-replication-tools
+```
 
-## 🚀 Usage
+### Option 2: Download the script directly
+```powershell
+Invoke-WebRequest -Uri "https://raw.githubusercontent.com/vgorin-lab/ad-replication-tools/main/Test-ADReplication.ps1" -OutFile "Test-ADReplication.ps1"
+```
 
-### Basic Health Check
+## ⚡ Quick Start
+Run a basic replication health check for current domain:
 ```powershell
 .\Test-ADReplication.ps1
+```
+
+## 📚 Examples
+
+### Check a specific domain
+```powershell
+.\Test-ADReplication.ps1 -Domain corp.contoso.com
+```
+
+### Run with verbose output  
+```powershell
+.\Test-ADReplication.ps1 -Verbose
+```
+
+### Save results to a variable for automation
+```powershell
+$health = .\Test-ADReplication.ps1
+$health.OverallHealth
+$health.ReplicationErrors
+```
+
+## 🔗 Documentation
+
+More sysadmin tips and tricks: [sysadmintips.ru](https://sysadmintips.ru)
+*Detailed AD replication guide coming soon.*
+
+## 📄 License
+Distributed under the MIT License. See LICENSE file for more information.
+
+## Author
+**Vlad Gorin** (vgorin-lab)
+
+
